@@ -57,12 +57,14 @@ helpers do
   def winner!(msg)
     @play_again = true
     @success = "<strong> #{session[:set_name]} wins!</strong> #{msg}"
+    session[:player_pot] = session[:player_pot] + session[:player_bet]
     @show_hit_or_stay_buttons = false
   end
 
   def loser!(msg)
     @play_again = true
     @error = "<strong> #{session[:set_name]} loses!</strong> #{msg}"
+    session[:player_pot] = session[:player_pot] - session[:player_bet]
     @show_hit_or_stay_buttons = false
   end
 
@@ -79,6 +81,7 @@ end
 
 
 get '/set_name' do 
+  session[:player_pot] = 500
   erb :set_name
 end
 
@@ -89,7 +92,7 @@ post '/set_name' do
   end
 
   session[:set_name] = params[:set_name]
-  redirect '/game'
+  redirect '/bet'
 end
 
 get '/game' do
@@ -168,6 +171,25 @@ get '/game/compare' do
     tie!("Both dealer and #{session[:set_name]} stayed at #{player_total}")
   end
   erb :game
+end
+
+get '/bet' do
+  session[:player_bet] = nil
+  erb :bet
+end
+
+post '/bet' do
+  if params[:bet_amount].nil? || params[:bet_amount].to_i == 0
+    @error = "Must make a bet"
+    halt erb(:bet)
+  elsif session[:bet_amount].to_i > session[:player_pot]
+    @error = "Bet amount cannot be greater than what you have ($#{session[:player_pot]})"
+    halt erb(:bet)
+  else
+    session[:player_bet] = params[:bet_amount].to_i
+    redirect '/game'
+
+  end
 end
 
 get '/game_over' do

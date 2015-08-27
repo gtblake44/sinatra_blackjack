@@ -1,0 +1,8 @@
+<h3>Make a bet this round</h3>
+<p><%= session[:set_name]%> has $<%= session[:player_pot].to_i %></p>
+<form action='/bet' method='post'>
+	<input type="text" name="bet_amount" />
+	<br>
+	<input type="submit" value="make a bet" class="btn" />
+
+</form>
